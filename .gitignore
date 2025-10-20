@@ -1,0 +1,5 @@
+*/.vs
+*/run
+*/bin
+*/obj
+*/__pycache__

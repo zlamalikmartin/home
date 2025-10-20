@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Chat (1.0)</title>
+</head>
+<body>
+    <h1>WebSocket Chat (1.0)</h1>
+    <hr/>
+    <div id="infobox"></div>
+    <button onclick="resetUsername()">Reset username</button>
+    <div id="statusbox"></div>
+    <hr/>
+    <table style="width:100%" rules="all" id="chatbox">
+        <tr>
+            <th style="width:20%">timestamp</th>
+            <th style="width:10%">username</th>
+            <th style="width:70%">message</th>
+        </tr>
+    </table>
+    <hr/>
+    <input type="text" id="message" placeholder="Type a message...">
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        //const ws = new WebSocket("ws://185.158.66.101:9001/");
+        const ws = new WebSocket("ws://localhost:55555/ws");
+        //let username = prompt("Enter your username:");
+        let username = localStorage.getItem("username");
+
+        ws.onopen = () => {
+            console.log("Connected to the WebSocket server");
+            setUsername();
+            const statusbox = document.getElementById("statusbox");
+            statusbox.textContent = "connected";
+        };
+
+        ws.onclose = () => {
+            console.log("Disconnected to the WebSocket server");
+            const statusbox = document.getElementById("statusbox");
+            statusbox.textContent = "disconnected";
+        }
+
+        ws.onmessage = (event) => {
+            data = JSON.parse(event.data);
+            const chatbox = document.getElementById("chatbox");
+            const row = document.createElement("tr");
+            
+            let col = document.createElement("td");
+            col.textContent = data.timestamp;
+            row.appendChild(col);
+
+            col = document.createElement("td");
+            col.textContent = data.username;
+            row.appendChild(col);
+
+            col = document.createElement("td");
+            col.textContent = data.message;
+            row.appendChild(col);
+
+            //message.textContent = data.timestamp + " " + data.username + ":" + data.message;
+            chatbox.appendChild(row);
+        };
+
+        function sendMessage() {
+            const input = document.getElementById("message");
+            //const message = `${username}: ${input.value}`;
+            if (input.value.length > 0) {
+                var data = {};
+                data["username"] = username;
+                data["timestamp"] = new Date().toISOString();
+                data["message"] = input.value;
+                ws.send(JSON.stringify(data));
+                input.value = "";
+            }
+        }
+
+        function setUsername() {
+            while (username == null || (username.length <= 0)) {
+                username = prompt("Enter your username:");
+            }
+            localStorage.setItem("username", username);
+            const statusbox = document.getElementById("infobox");
+            statusbox.textContent = username;
+        }
+
+        function resetUsername() {
+            username = null;
+            localStorage.removeItem("username");
+            const statusbox = document.getElementById("infobox");
+            statusbox.textContent = "";
+            setUsername();
+        }
+    </script>
+</body>
+</html>
