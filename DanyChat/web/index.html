@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>WebSocket Chat (1.0)</title>
+    <title>WebSocket Chat</title>
 </head>
 <body>
     <h1>WebSocket Chat (1.0)</h1>
+    <h4>NOW</h4>
     <hr/>
     <div id="infobox"></div>
     <button onclick="resetUsername()">Reset username</button>
@@ -23,7 +24,7 @@
 
     <script>
         //const ws = new WebSocket("ws://185.158.66.101:9001/");
-        const ws = new WebSocket("ws://localhost:55555/ws");
+        const ws = new WebSocket("wss://localhost:443/ws");
         //let username = prompt("Enter your username:");
         let username = localStorage.getItem("username");
 

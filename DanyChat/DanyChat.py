@@ -1,16 +1,34 @@
 import aiohttp
 from aiohttp import web, WSCloseCode
 import asyncio
+import tempfile
+from datetime import datetime
 import sys
 import ssl
+
+httphostname = "localhost"
+wshostname = "localhost"
+port = int(443)
 
 connected_clients = set()
 messages = []
 
 async def http_handler(request):
     #return web.Response(text='Hello, world')
-    return web.FileResponse('web/index.html')
-
+    #return web.FileResponse('web/index.html')
+    now = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+    with open("web/index.html", "rt") as fin:
+        with tempfile.NamedTemporaryFile(mode='w', delete=False) as fout:
+        #with open("run/index.html", "wt") as fout:
+            for line in fin:
+                line = line.replace('localhost', wshostname)
+                line = line.replace('443', str(port))
+                line = line.replace('NOW', now)
+                fout.write(line)
+            return web.FileResponse(fout.name, headers={'Content-Type': 'text/html'})
+    return web.Response(text='File not found', status = 404)
+    
+# https://stackoverflow.com/questions/53689602/python-3-websockets-server-http-server-run-forever-serve-forever
 async def websocket_handler(request):
     ws = web.WebSocketResponse()
     await ws.prepare(request)
@@ -48,21 +66,30 @@ def create_runner():
 
 
 async def start_server(host, port):
+    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    ssl_cert = "cert/certificate.crt"
+    ssl_key = "cert/private.key"
+    ssl_context.load_cert_chain(ssl_cert, keyfile=ssl_key)
+
+    # https://stackoverflow.com/questions/77937445/how-to-setup-an-aiohttp-server-using-mtls-self-signed-ssl-ca-certificates
     runner = create_runner()
     await runner.setup()
-    site = web.TCPSite(runner, host, port)
+    site = web.TCPSite(runner, host, port, ssl_context=ssl_context)
     await site.start()
 
 
 def main():
-    port = 55555
-    hostname = "localhost"
+    global httphostname, wshostname, port
     if len(sys.argv) > 1:
-        hostname = sys.argv[1]
-    print("Server starting on " + hostname + ":" + str(port))
+        httphostname = sys.argv[1]
+    if len(sys.argv) > 2:
+        wshostname = sys.argv[2]
+    if len(sys.argv) > 3:
+        port = int(sys.argv[3])
+    print("Server starting on http:" + httphostname + " ws:" + wshostname + " port:" + str(port))
 
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(start_server(host=hostname, port=port))
+    loop.run_until_complete(start_server(host=httphostname, port=port))
     loop.run_forever()
 
 if __name__ == "__main__":
