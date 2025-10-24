@@ -88,9 +88,14 @@ def main():
         port = int(sys.argv[3])
     print("Server starting on http:" + httphostname + " ws:" + wshostname + " port:" + str(port))
 
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(start_server(host=httphostname, port=port))
-    loop.run_forever()
+    try:
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(start_server(host=httphostname, port=port))
+        loop.run_forever()
+    except KeyboardInterrupt:
+        pass
+
+    print("Server shuting down")
 
 if __name__ == "__main__":
     main()

@@ -1,5 +1,7 @@
-*/.vs
-*/run
-*/bin
-*/obj
-*/__pycache__
+**/.vs
+**/run
+**/bin
+**/obj
+**/__pycache__
+**/*.crt
+**/*.key
