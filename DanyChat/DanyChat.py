@@ -86,7 +86,7 @@ def main():
         wshostname = sys.argv[2]
     if len(sys.argv) > 3:
         port = int(sys.argv[3])
-    print("Server starting on http:" + httphostname + " ws:" + wshostname + " port:" + str(port))
+    print("Server starting [http:" + httphostname + " ws:" + wshostname + " port:" + str(port) + "]")
 
     try:
         loop = asyncio.get_event_loop()
@@ -95,7 +95,7 @@ def main():
     except KeyboardInterrupt:
         pass
 
-    print("Server shuting down")
+    print("Server shutting down")
 
 if __name__ == "__main__":
     main()
